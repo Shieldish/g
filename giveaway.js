@@ -47,11 +47,9 @@ function pickWinners() {
     }
   }
 
-  // Display winners
-  const winnersContainer = document.getElementById("winners");
-  winnersContainer.innerHTML = winners
+  // Display winners in modal
+  const modalWinners = document.getElementById("modal-winners");
+  modalWinners.innerHTML = winners
     .map((winner) => `<div class="winner">${winner}</div>`)
     .join("");
-
-  alert(`Winners: ${winners.join(", ")}`);
 }
