@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Giveaway App</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        .winner-animation {
+            animation: winner-pulse 1s infinite;
+        }
+        @keyframes winner-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .entry-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <!-- Setup Section -->
+        <div class="card shadow">
+            <div class="card-body">
+                <h3><i class="fas fa-gift text-primary"></i> Giveaway Setup</h3>
+                <div class="mb-3">
+                    <label class="form-label">Keyword to Enter</label>
+                    <input type="text" id="keyword" class="form-control" placeholder="Example: !enter, #giveaway">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Number of Winners</label>
+                    <input type="number" id="winnerCount" class="form-control" min="1" value="1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Section -->
+        <div class="card shadow mt-4">
+            <div class="card-body">
+                <h3><i class="fas fa-users text-success"></i> Entries</h3>
+                <div class="input-group mb-3">
+                    <input type="text" id="entryInput" class="form-control" placeholder="Type message with keyword to enter">
+                    <button class="btn btn-primary" onclick="addEntry()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+                <div class="entry-list" id="entries"></div>
+            </div>
+        </div>
+
+        <!-- Draw Button -->
+        <div class="text-center mt-4">
+            <button class="btn btn-lg btn-success" onclick="drawWinners()">
+                <i class="fas fa-trophy"></i> Draw Winners
+            </button>
+        </div>
+    </div>
+
+    <!-- Winners Modal -->
+    <div class="modal fade" id="winnersModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-crown"></i> Winners Announced!
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center" id="winnersList">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let entries = [];
+        const modal = new bootstrap.Modal(document.getElementById('winnersModal'));
+
+        function addEntry() {
+            const message = document.getElementById('entryInput').value;
+            const keyword = document.getElementById('keyword').value;
+
+            if (!keyword) {
+                alert('Please set a keyword first!');
+                return;
+            }
+
+            if (message.toLowerCase().includes(keyword.toLowerCase())) {
+                const entry = {
+                    name: `User${entries.length + 1}`,
+                    message: message,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+
+                entries.push(entry);
+                updateEntriesList();
+                document.getElementById('entryInput').value = '';
+            }
+        }
+
+        function updateEntriesList() {
+            const entriesDiv = document.getElementById('entries');
+            entriesDiv.innerHTML = entries.map(entry => `
+                <div class="alert alert-light border">
+                    <strong>${entry.name}</strong> - ${entry.timestamp}<br>
+                    ${entry.message}
+                </div>
+            `).join('');
+        }
+
+        function drawWinners() {
+            if (entries.length === 0) {
+                alert('No entries yet!');
+                return;
+            }
+
+            const winnerCount = Math.min(
+                parseInt(document.getElementById('winnerCount').value),
+                entries.length
+            );
+
+            const winners = [];
+            const entriesCopy = [...entries];
+
+            for (let i = 0; i < winnerCount; i++) {
+                const randomIndex = Math.floor(Math.random() * entriesCopy.length);
+                winners.push(entriesCopy.splice(randomIndex, 1)[0]);
+            }
+
+            document.getElementById('winnersList').innerHTML = winners.map((winner, index) => `
+                <div class="winner-animation mb-3">
+                    <h3 class="text-success">
+                        <i class="fas fa-trophy"></i>
+                        Winner #${index + 1}
+                    </h3>
+                    <h4>${winner.name}</h4>
+                    <p class="text-muted">${winner.message}</p>
+                </div>
+            `).join('');
+
+            modal.show();
+        }
+    </script>
+</body>
+</html>
